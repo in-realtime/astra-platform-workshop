@@ -1,4 +1,4 @@
-# Stock Ticker Workshop
+# Data Pipeline Workshop
 
 This workshop will provide good exposure to the tools and processes needed to create a complete data stream from source to target.  We will use the Pulsar CLI, locally run sources, Astra based topics, functions, and sinks, and finally ElasticSearch and Snowflake.
 
