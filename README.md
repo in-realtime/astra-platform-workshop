@@ -24,6 +24,7 @@ If you do not have an ElastSearch account, create a free trial account.  Once do
 Once it is ready, click on your deployment in the menu on the left.  Take note of the following items as you'll need them in later steps.
 * ElasticSearch endpoint
 * Kibana endpoint
+!(assets/elastic_items.png)
 <img width="609" alt="Elastic Deployment - items" src="https://user-images.githubusercontent.com/102260188/227119678-bc9e2939-8e25-42cc-a267-b37b517c9c3a.png">
 
 
