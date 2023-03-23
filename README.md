@@ -22,11 +22,10 @@ To execute this workshop, ensure that you have the following:
 If you do not have an ElastSearch account, create a free trial account.  Once done, create a deployment in the uscentral1 GCP region.  <b>Be sure to save the credentials that are provided</b> as you'll need them later.
 
 Once it is ready, click on your deployment in the menu on the left.  Take note of the following items as you'll need them in later steps.
-* ElasticSearch url
-* Kibana url
+* ElasticSearch endpoint
+* Kibana endpoint
+<img width="609" alt="Elastic Deployment - items" src="https://user-images.githubusercontent.com/102260188/227119678-bc9e2939-8e25-42cc-a267-b37b517c9c3a.png">
 
-### Snowflake Sink
-If you don't have a Snowflake account, you can create a free trial account. You'll configure this in a later step.. 
 
 ## Setup
 In this section, we will walk through setup of the tools needed to execute this workshop.  This includes the Pulsar CLI, our Cassandra table, and accounts with ElasticSearch and Snowflake.
