@@ -1,28 +1,27 @@
 # Data Pipeline Workshop
 
-This workshop will provide good exposure to the tools and processes needed to create a complete data stream from source to target.  We will use the Pulsar CLI, locally run sources, Astra based topics, functions, and sinks, and finally ElasticSearch and Snowflake.
+This workshop will provide good exposure to the tools and processes needed to create a complete data stream from source to target. The stream you will create is a simulation of a stock trade data stream.
+We will use Astra Streaming topics/functions/sinks, the Pulsar CLI, file data sources, Astra DB with CDC, and finally ElasticSearch.
 
-The stream you will create is a simulation of a stock trade stream.  The process you will follow for this workshop is as follows:
+The process you will follow for this workshop is as follows:
     
-* Incoming data will come from a file that will be consumed with a Pulsar source running locally on your laptop.  This will provide experience in using the Pulsar CLI to interact with Astra.  
-* We will deploy a function that will enrich the messages, and publish them to an Astra DB sink.
-* CDC will detect changes in the table the sink writes to and publish them to a data topic
-* We will deploy a function that filters messages and publishes them to multiple topics
-* Messages from those topics will be consumed with sinks to ElasticSearch and Snowflake
+* Incoming data will come from a file that will be consumed by a Pulsar source (running locally on your laptop or on GitPod).  This will provide experience in using the Pulsar CLI to interact with Astra.  
+* We will deploy a function that will enrich the messages, and store them in Astra DB using a sink.
+* CDC will detect changes in the Astra DB table and publish them to a data topic in Astra Streaming.
+* We will deploy a function that filters messages and publishes them to multiple topics based on their content.
+* Messages from those topics will be consumed with sinks to ElasticSearch.
 
 ## Prerequisites
 To execute this workshop, ensure that you have the following:
 * Java 11 installed
-* [Pulsar 2.10.x](https://github.com/datastax/pulsar/releases/download/ls210_2.5/lunastreaming-all-2.10.2.5-bin.tar.gz)
-* Astra Account with streaming enabled
-* An [ElasticSearch](http://elasticsearch.com) account
-* A [Snowflake](http://snowflake.com) account
-    * Follow Step 1 on [this blog post](https://medium.com/building-the-open-data-stack/datastax-presents-snowflake-sink-connector-for-apache-pulsar-53629b196064)
+* [Pulsar 2.10.x](https://github.com/datastax/pulsar/releases/download/ls210_4.0/lunastreaming-2.10.4.0-bin.tar.gz)
+* An [Astra](https://astra.datastax.com) account with streaming enabled
+* An [ElasticSearch](https://www.elastic.co/) account
 
 ### ElasticSearch Sink
-If you do not have an ElastSearch account, create a free trial account.  Once done, create a deployment in the uscentral1 GCP region.  <b>Be sure to save the credentials that are provided</b>.  You'll need them later.
+If you do not have an ElastSearch account, create a free trial account.  Once done, create a deployment in the uscentral1 GCP region.  <b>Be sure to save the credentials that are provided</b> as you'll need them later.
 
-Once it is ready, click on your deployment in the menu on the left.  This page will provide you with a number of items you'll need in later steps.
+Once it is ready, click on your deployment in the menu on the left.  Take note of the following items as you'll need them in later steps.
 * ElasticSearch url
 * Kibana url
 
