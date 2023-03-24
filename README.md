@@ -54,9 +54,9 @@ In this section, we will walk through setup of the tools needed to execute this 
 1. Log into your Astra account.
 
 2. Create a Streaming Tenant
-    - Navigate to *Streaming* in the Menu.
-    - Click on the *Create Tenant* button.
-    - Create a streaming tenant using the following:
+    1. Navigate to *Streaming* in the Menu.
+    2. Click on the *Create Tenant* button.
+    3. Create a streaming tenant using the following:
         * Tenant Name: irt
         * Provider: Google Cloud
         * Region: useast1
@@ -65,14 +65,14 @@ In this section, we will walk through setup of the tools needed to execute this 
 
 3. Create a Namespace & Topic
     1. Create Namespace 
-        - Navigate to *Streaming* in the Menu.
-        - Open the `irt` tenant.
-        - Navigate to the *Namespace and Topics* tab.
-        - Click on the *Create Namespace* button.
-        - Enter `stocks` as the Namespace Name.
+        1. Navigate to *Streaming* in the Menu.
+        2. Open the `irt` tenant.
+        3. Navigate to the *Namespace and Topics* tab.
+        4. Click on the *Create Namespace* button.
+        5. Enter `stocks` as the Namespace Name.
     2. Create Topic
-        - Click on the *Add Topic* button in the `stocks` Namespace.
-        - Enter `stocks-in` as the Topic Name.
+        1. Click on the *Add Topic* button in the `stocks` Namespace.
+        2. Enter `stocks-in` as the Topic Name.
 
         <img width="800" src="assets/add_topic.png">
     3. Create Schema
@@ -85,14 +85,14 @@ In this section, we will walk through setup of the tools needed to execute this 
 
 4. Add Streaming Configuration to Pulsar CLI
     1. Download configuration file
-        - Navigate to the *Connect* tab.
-        - Click on the *Download client.conf* button.
+        1. Navigate to the *Connect* tab.
+        2. Click on the *Download client.conf* button.
     2. Add *client.conf* to Pulsar CLI
-        - Navigate to `<YOUR PULSAR DIR>/conf` on your laptop.
+        1. Navigate to `<YOUR PULSAR DIR>/conf` on your laptop.
             ```sh
             cd <YOUR PULSAR DIR>/conf
             ```
-        - Move the existing `client.conf` file to `client.conf.local` and copy the file you just downloaded into this directory with the name `client.conf`.  
+        2. Move the existing `client.conf` file to `client.conf.local` and copy the file you just downloaded into this directory with the name `client.conf`.  
             ```sh
             mv client.conf client.conf.local
             cp <PATH TO NEW FILE>/client.conf .
@@ -209,39 +209,82 @@ Next we will add a function to the stream.  This function will consume messages 
         cp <YOUR GITHUB PROJECT DIR>/stock-prices-10.csv /tmp/stocks
         ```
 
-You should see messages consumed by the Pulsar client we just created.  They should be in JSON format.
+You should see messages consumed by the Pulsar client consumer we just created.  They should be in JSON format.
 
 
 ### Storing Data in Astra DB
 
-The messages that are created by consuming the stock file and enriched by the first function will be inserted into a table in Astra DB. 
+The messages that are created by consuming the stock file and then enriched by the first function will be inserted into a table in Astra DB. 
 
-1. In the Astra DB UI, create a database called as-demo in the uscentral1 GCP region with a keyspace named demo.  **Be sure to download your token details.** You'll need them to create the Astra DB sink.
+1. Log into your Astra account.
 
-2. Once the database is created, create the following table:
-    ```
-    create table demo.stocks ( 
-        uid uuid primary key,
-        symbol text, 
-        trade_date text, 
-        open_price float, 
-        high_price float, 
-        low_price float, 
-        close_price float, 
-        volume int 
-    );
-    ```
-    DO NOT enable CDC on this table yet.
+2. Create a Database
+    1. Navigate to *Databases* in the Menu.
+    2. Click on the *Create Database* button.
+    3. Create the database using the following:
+        * Database Name: `irt`
+        * Keyspace Name: `stocks`
+        * Provider: `Google`
+        * Region: `us-east1`
+        
+    <img width="700" src="assets/create_database.png">
 
-3. To create an Astra DB sink, go to the your Astra Streaming tenant and click on the Sinks tab. Once there click Create and fill in the form with the information based on what we've done to this point. You'll consume the `stocks-enriched` topic and you'll need to use the following mapping. Do not use the default mapping if the field is populated:
+3. Generate a Token
+    1. Click on the *Generate Token* button.
+    2. Click on *Download Token Details*.
+    3. Open the downloaded file `irt-token.json` and verify that you can read the file.
 
-```
-uid=value.uuid,symbol=value.symbol,trade_date=value.date,open_price=value.openPrice,high_price=value.highPrice,low_price=value.lowPrice,close_price=value.closePrice,volume=value.volume
-```
+4. Create the `stocks` Table
+    1. Navigate to the `CQL Console` tab
+    2. Paste the following CQL command into the CQL Console:
+        ```sql
+        create table stocks.stocks ( 
+            uid uuid primary key,
+            symbol text, 
+            trade_date text, 
+            open_price float, 
+            high_price float, 
+            low_price float, 
+            close_price float, 
+            volume int 
+        );
+        ```
+    3. DO NOT enable CDC on this table yet.
 
-    For the token, you'll use the token value found in the credentials file you just downloaded when creating your Astra DB instance. Use the defaults for everything else.
+5. Create a Sink
+    1. Navigate to *Streaming* in the Menu.
+    2. Open the `irt` Tenant.
+    3. Navigate to the *Sinks* tab
+    4. Click on the *Create Sink* button.
+    5. Create the sink using the following:
+        - The Basics
+            - Namespace: `stocks`
+            - Sink Type: `Astra DB`
+            - Name: `stocks2astradb`
+        - Connect Topics
+            - Input Topics: stocks-enriched
+        - Sink-Specific Configuration
+            - Database: `irt`
+            - Token: `<YOUR ASTRA DB TOKEN>`
+            - Keyspace: `stocks`
+            - Table Name: `stocks`
+            - Mapping: `uid=value.uuid,symbol=value.symbol,trade_date=value.date,open_price=value.openPrice,high_price=value.highPrice,low_price=value.lowPrice,close_price=value.closePrice,volume=value.volume`
+    
+        <img width="800" src="assets/create_sink.png">
 
-4. Copy the `<YOUR GITHUB PROJECT DIR>/stock-prices-10.csv` file to the `/tmp/stocks` directory. You should see 10 records inserted into the table once it completes.
+6. Trigger a file read
+    1. Place Data File
+        ```sh
+        cp <YOUR GITHUB PROJECT DIR>/stock-prices-10.csv /tmp/stocks
+        ```
+7. Validate the data flow into the `stocks` table
+    1. Navigate to *Databases* in the Menu.
+    2. Open the `irt` Tenant.
+    3. Navigate to the `CQL Console` tab
+    4. Paste the following CQL query into the CQL Console:
+        ```sql
+        select * from stocks.stocks;
+        ```
 
 ### Change Data Capture 
 
