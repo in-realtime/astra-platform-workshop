@@ -55,30 +55,30 @@ In this section, we will walk through setup of the tools needed to execute this 
 
 2. Create a Streaming Tenant
     1. Navigate to *Streaming* in the Menu.
-    2. Click on the *Create Tenant* button.
+    2. Click the *Create Tenant* button.
     3. Create a streaming tenant using the following:
         * Tenant Name: irt
         * Provider: Google Cloud
         * Region: useast1
     
-    <img width="687" src="assets/create_streaming.png">
+    <img width="344" src="assets/create_streaming.png">
 
 3. Create a Namespace & Topic
     1. Create Namespace 
         1. Navigate to *Streaming* in the Menu.
         2. Open the `irt` tenant.
         3. Navigate to the *Namespace and Topics* tab.
-        4. Click on the *Create Namespace* button.
+        4. Click the *Create Namespace* button.
         5. Enter `stocks` as the Namespace Name.
     2. Create Topic
-        1. Click on the *Add Topic* button in the `stocks` Namespace.
+        1. Click the *Add Topic* button in the `stocks` Namespace.
         2. Enter `stocks-in` as the Topic Name.
 
         <img width="800" src="assets/add_topic.png">
     3. Create Schema
         - Open the `stocks-in` Topic.
         - Navigate to the *Schema* tab.
-        - Click on the *Create Schema* button.
+        - Click the *Create Schema* button.
         - Select `String` as the Schema Type.
 
         <img width="800" src="assets/add_schema.png">
@@ -86,7 +86,7 @@ In this section, we will walk through setup of the tools needed to execute this 
 4. Add Streaming Configuration to Pulsar CLI
     1. Download configuration file
         1. Navigate to the *Connect* tab.
-        2. Click on the *Download client.conf* button.
+        2. Click the *Download client.conf* button.
     2. Add *client.conf* to Pulsar CLI
         1. Navigate to `<YOUR PULSAR DIR>/conf` on your laptop.
             ```sh
@@ -111,7 +111,7 @@ The various Pulsar CLIs are installed as part of the Pulsar distribution and can
 
 2. Create a **consumer** using the following command.  The `-s` option specifies your subscription name and the `-n 0` option tells the client to consume messages continuously.
     ```sh
-        ./pulsar-client consume -s test -n 0 irt/stocks/stocks-in`
+        ./pulsar-client consume -s test -n 0 irt/stocks/stocks-in
     ```
 
 3. In a new terminal window, create a **producer** using the following command.
@@ -132,6 +132,10 @@ Now that you have a topic that you can publish to, create a Pulsar file source c
 
 2. Install the File Connector
     1. Download the [file connector](https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=pulsar/pulsar-2.10.3/connectors/pulsar-io-file-2.10.3.nar) from the Apache Pulsar site.
+        ```sh
+        cd <YOUR PULSAR DIR>/connectors
+        wget -O pulsar-io-file-2.10.3.nar "https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=pulsar/pulsar-2.10.3/connectors/pulsar-io-file-2.10.3.nar"
+        ```
     2. Place this file in `<YOUR PULSAR DIR>/connectors`.
 
 3. Collect the following information:
@@ -179,10 +183,10 @@ Next we will add a function to the stream.  This function will consume messages 
 
 3. Create an Astra Streaming Function
     1. Navigate to the `Functions` tab of the `irt` streaming tenant.
-    2. Click on the *Create Function* button.
+    2. Click the *Create Function* button.
     3. Create the function using:
         - Name Your Function
-            - Function Name: `enrichFunction`
+            - Function Name: `enrichfunction`
             - Namespace: `stocks`
         - Upload Your Code
             - Upload my own code
@@ -193,7 +197,7 @@ Next we will add a function to the stream.  This function will consume messages 
             - Input Topic: `stocks-in`
         - Choose Destination Topics
             - Namespace: `stocks`
-            - Input Topic: `stocks-enriched`
+            - Output Topic: `stocks-enriched`
         - Leave the advanced configuration items set to the defaults.
     4. You can watch the startup of your function by clicking the name and scrolling to the bottom where the logs are displayed.
 
@@ -220,17 +224,17 @@ The messages that are created by consuming the stock file and then enriched by t
 
 2. Create a Database
     1. Navigate to *Databases* in the Menu.
-    2. Click on the *Create Database* button.
+    2. Click the *Create Database* button.
     3. Create the database using the following:
         * Database Name: `irt`
         * Keyspace Name: `stocks`
         * Provider: `Google`
         * Region: `us-east1`
         
-    <img width="700" src="assets/create_database.png">
+    <img width="350" src="assets/create_database.png">
 
 3. Generate a Token
-    1. Click on the *Generate Token* button.
+    1. Click the *Generate Token* button.
     2. Click on *Download Token Details*.
     3. Open the downloaded file `irt-token.json` and verify that you can read the file.
 
@@ -255,14 +259,14 @@ The messages that are created by consuming the stock file and then enriched by t
     1. Navigate to *Streaming* in the Menu.
     2. Open the `irt` Tenant.
     3. Navigate to the *Sinks* tab
-    4. Click on the *Create Sink* button.
+    4. Click the *Create Sink* button.
     5. Create the sink using the following:
         - The Basics
             - Namespace: `stocks`
             - Sink Type: `Astra DB`
             - Name: `stocks2astradb`
         - Connect Topics
-            - Input Topics: stocks-enriched
+            - Input Topics: `stocks-enriched`
         - Sink-Specific Configuration
             - Database: `irt`
             - Token: `<YOUR ASTRA DB TOKEN>`
@@ -279,62 +283,161 @@ The messages that are created by consuming the stock file and then enriched by t
         ```
 7. Validate the data flow into the `stocks` table
     1. Navigate to *Databases* in the Menu.
-    2. Open the `irt` Tenant.
+    2. Open the `irt` Database.
     3. Navigate to the `CQL Console` tab
     4. Paste the following CQL query into the CQL Console:
         ```sql
         select * from stocks.stocks;
         ```
+    <img width="800" src="assets/select_stocks.png">
+
 
 ### Change Data Capture 
 
-Now that we have a table, let's enable CDC and look at what gets created.
+Now that we have a table holding enriched stock data, let's enable CDC and look at what gets created.
+1. Enable CDC
+    1. Navigate to *Databases* in the Menu.
+    2. Open the `irt` Database.
+    3. Navigate to the `CDC` tab
+    4. Click the `Enable CDC` button
+    5. Enable CDC using the following:
+        - Tenants: `pulsar-gcp-east1 / irt`
+        - Keyspace: `stocks`
+        - Table Name: `stocks`
+    
+    <img width="350" src="assets/enable_cdc.png">
 
-1. Click on the CDC tab in your Astra DB instance.  Click the `Enable CDC` button at the top right and then pick your tenant, keyspace, and enter the table name.  The table should be enabled quickly.  
+2. Get the CDC Data topic name
+    1. Navigate to *Streaming* in the Menu.
+    2. Open the `irt` Tenant.
+    3. Navigate to the `Namespaces and Topics` tab.
+        - notice that there is a new Namespace created by enabling CDC: `astracdc`.
+    4. Expand the `astracdc` Namespace.
+        - You should see a data topic and a log topic.
+    5. Copy the name of the data topic for the next step.    
 
-2. Return to your streaming tenant and click on the `Namespaces and Topics` tab.  You should now see an `astracdc` namespace.  If you open that namespace you should see a data topic and a log topic.
+3. Create a **consumer** for the CDC Data topic
+    1. In a new terminal window:
+    ```sh
+    cd <YOUR PULSAR DIR>
+    ./pulsar-client consume -s test -n 0 irt/astracdc/data-xxxxxxxxxxxxxxxxx.stocks
+    ```
+4. Trigger a file read
+    1. Place Data File
+        ```sh
+        cp <YOUR GITHUB PROJECT DIR>/stock-prices-10.csv /tmp/stocks
+        ```
 
-3. Create a consumer from the CLI that consumes the data topic and copy your data file to the temp directory again.  Your consumer should receive 10 messages. 
+    Your consumer should receive 10 messages. 
 
-### Stock Filter Function
-The last part of the stream prior to sending data to external systems is to create the filter function in Astra Streaming.  This function will consume data from the CDC data topic and publish a new message to the topic that corresponds to the symbol in the message.
 
-1. Create three topics from the command line using the "pulsar-admin".  Give this a try using the CLI if you want to get experience creating things from that point of view.
+### Stock Routing Function
+The last part of the stream prior to sending data to external systems is to create the routing function in Astra Streaming.  This function will consume data from the CDC data topic and publish a new message to a topic that corresponds to the symbol in the message.
 
-    * stocks-aapl
-    * stocks-goog
-    * stocks-default
+1. Create stock specific Topics
+    1. Navigate to *Streaming* in the Menu.
+    2. Open the `irt` tenant.
+    3. Navigate to the *Namespace and Topics* tab.
+    4. Click the *Add Topic* button in the `stocks` Namespace.
+        1. Enter `stocks-default` as the Topic Name.
+    5. Repeat for each of:
+        - `stocks-aapl`
+        - `stocks-goog`
 
-    Look at the filter function code in your GitHub project.  This code provides an example of how you can publish messages to multiple topics from one function.  It works by looking at the stock symbol field of the incoming message and filters based on the value.  It will pass all messages that match AAPL to the "stocks-aapl" topic and all messages that match "GOOG" to the "stocks-goog" topic.  All messages will be published to the `stocks-default` topic.
+2. Routing Function
+    
+    Look at the routing function code in your GitHub project in `src/main/java/com/datastax/demo/function/FilterStockByTicker.java`
 
-2. Edit `FilterStockByTicker.java` changing the tenant name to your tenant.
-3. Compile the class with `./mvnw clean package`
-4. Deploy the function to Astra Streaming using the CDC data topic as the input and `stocks-default` as the destionation topic.
-5. Create a consumer for each of the output topics, and then copy your data file to your temp directory to verify everything works.
+    This code provides an example of how you can publish messages to multiple topics from one function.  It works by looking at the stock symbol field of the incoming message and filters based on the value.  It will pass all messages that match AAPL to the "stocks-aapl" topic and all messages that match "GOOG" to the "stocks-goog" topic.  All messages will be published to the `stocks-default` topic.
+
+3. Compile the class
+    ```sh
+    cd <YOUR GITHUB PROJECT DIR>
+    ./mvnw clean package
+    ```
+4. Create an Astra Streaming Function from the compiled class
+    1. Navigate to the `Functions` tab of the `irt` streaming tenant.
+    2. Click the *Create Function* button.
+    3. Create the function using:
+        - Name Your Function
+            - Function Name: `routingfunction`
+            - Namespace: `stocks`
+        - Upload Your Code
+            - Upload my own code
+            - Select the file `function-demo-0.0.1-SNAPSHOT.jar`
+            - Choose a function: `FilterStockByTicker`
+        - Choose Input Topics
+            - Namespace: `astracdc`
+            - Input Topic: `data-xxxxxxxxxxxxxxxxx.stocks`
+        - Choose Destination Topics
+            - Namespace: `stocks`
+            - Output Topic: `stocks-default`
+        - Leave the advanced configuration items set to the defaults.
+    4. You can watch the startup of your function by clicking the name and scrolling to the bottom where the logs are displayed.
+
+5. Create a **consumer** for `stocks-aapl`
+    1. In a new terminal window:
+    ```sh
+    cd <YOUR PULSAR DIR>
+    ./pulsar-client consume -s test -n 0 irt/stocks/stocks-aapl
+    ```
+4. Trigger a file read
+    1. Place Data File
+        ```sh
+        cp <YOUR GITHUB PROJECT DIR>/stock-prices-10.csv /tmp/stocks
+        ```
+
 
 ### Send Data to External Targets
+
 #### ElasticSearch Sink
-The ElasticSearch sink is a built in connector for Astra Streaming.  Once you have an ElasticSearch account created, you'll need the following values in order to create the sink.
+The ElasticSearch sink is a built in connector for Astra Streaming.  From the setup step where you created an ElasticSearch account, you'll need the following values in order to create the sink.
 
-* Elastic URL which you can get from your deployment configuration in the Elastic dashboard
-* The username/password from the credentials file you downloaded when creating your deployment
+- Elastic Endpoint URL
+- Username / Password
 
-1. With those values available, click on the Sinks tab within your Astra Streaming tenant.  Pick your `stocks` namespace, add a name for your sink, choose Elastic Search as the sink type.  Once the sink type is chosen, the configuation items needed will be displayed below.  Fill in those fields with the following values.
+1. Create a Sink to Elasticsearch
+    1. Navigate to *Streaming* in the Menu.
+    2. Open the `irt` Tenant.
+    3. Navigate to the *Sinks* tab
+    4. Click the *Create Sink* button.
+    5. Create the sink using the following:
+        - The Basics
+            - Namespace: `stocks`
+            - Sink Type: `Elastic Search`
+            - Name: `stocks2elastic`
+        - Connect Topics
+            - Input Topics: `stocks-aapl`
+        - Sink-Specific Configuration
+            - Elastic Search URL: `<Elastic Endpoint URL>`
+            - Index Name: `appl-index`
+            - Username: `<Elastic Username>`
+            - Password: `<Elastic Password>`
+                - You can skip the token and API key fields
+            - Ignore Record Key: Disabled
+            - Strip Nulls: Disabled
+            - Enable Schemas: Disabled
+            - Copy Key Fields: Enabled
+            - Mapping: `uid=value.uuid,symbol=value.symbol,trade_date=value.date,open_price=value.openPrice,high_price=value.highPrice,low_price=value.lowPrice,close_price=value.closePrice,volume=value.volume`
+            
+        - For all other values, you can leave them set to the defaults.
 
-    * Elastic URL
-    * Use the `stocks` namespace
-    * Use the `stocks-aapl` topic as the input
-    * Use the username/password from the credentials file
-        * You can skip the token and API key fields
-    * Disable `Ignore Record Key`
-    * Disable `Strip Nulls`
-    * Disable `Enable Schemas`
-    * Enable `Copy Key Fields`
+        <img width="800" src="assets/create_sink_elastic.png">
 
-    For all other values, you can leave them set to the defaults and click the `Create` button.  Click the sink name on the following page and you can see the configuration and logs for the sink as it's being created.
+    6. Click the sink name on the following page and you can see the configuration and logs for the sink as it's being created.
 
-2. Once the sink is running, copy the stocks data file to `/tmp/stocks`.  If you still have your function and command line consumers running you should see messages flow through the various topics.
+2. Trigger a file read
+    1. Once the sink is running, place Data File
+        ```sh
+        cp <YOUR GITHUB PROJECT DIR>/stock-prices-10.csv /tmp/stocks
+        ```
 
-3. Now that the data has been moved, go to the home page in your Kibana deployment, and click on `Enterprise Search`.  On the next page, click `Indices` and you should see an index called `appl-index`.  Click it and then the `Documents` tab, and you'll see records that were sent through the AAPL topic by the filter function created in the previous step.
-
-You can follow the same steps to create a sink for the `stocks-goog` topic if you want to try out creating multiple sinks.
+3. Validate the data flow into Elasticsearch
+    1. Log in to [Elasticsearch](https://cloud.elastic.co/)
+    2. Open your Elasticsearch Service Deployment
+    3. Click on `Enterprise Search`.  
+    4. Click `Indices` in the menu.
+    5. Open the index called `appl-index`.
+    5. Click on the `Documents` tab.
+    
+    You will see records that were sent through the AAPL topic by the routing function created in the previous step.
