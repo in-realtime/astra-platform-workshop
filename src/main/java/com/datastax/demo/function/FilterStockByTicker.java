@@ -12,10 +12,10 @@ import org.apache.pulsar.common.schema.KeyValue;
 
 public class FilterStockByTicker implements Function<GenericObject, Stock> {
     private static String APPLE_SYMBOL = "AAPL";
-    private static String APPLE_TOPIC = "persistent://as-demo/stocks/stocks-aapl";
+    private static String APPLE_TOPIC = "persistent://irt/stocks/stocks-aapl";
 
     private static String GOOGLE_SYMBOL = "GOOG";
-    private static String GOOGLE_TOPIC= "persistent://as-demo/stocks/stocks-goog";
+    private static String GOOGLE_TOPIC= "persistent://irt/stocks/stocks-goog";
 
     @Override
     public Stock process(GenericObject input, Context context) {
